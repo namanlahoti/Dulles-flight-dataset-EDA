@@ -2,36 +2,6 @@
 title: "Data Analysis Project"
 ---
 
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, 
-                      message = FALSE, 
-                      warning = FALSE,
-                      comment = "")
-```
-
-
-
-# Student Information
-
-Name: Naman Lahoti
-G Number:G01340550
-
-
-
-
-# Introduction
-
-This semester we will be working with a dataset of all domestic outbound flights from Dulles International Airport in 2016.
-
-Airports depend on accurate flight departure and arrival estimates to maintain operations, profitability, customer satisfaction, and compliance with state and federal laws. Flight performance, including departure and arrival delays must be monitored, submitted to the Federal Aviation Agency (FAA) on a regular basis, and minimized to maintain airport operations. **The FAA considered a flight to be delayed if it has an arrival delay of at least 15 minutes**.
-
-The executives at Dulles International Airport have hired you as a Data Science consultant to perform an exploratory data analysis on all domestic flights from 2016 and produce an executive summary of your key insights and recommendations to the executive team.
-
-Before you begin, take a moment to read through the following airline flight terminology to familiarize yourself with the industry: [Airline Flight Terms](https://www.myairlineflight.com)
-
-
-
 ## Dulles Flights Data
 
 The `flights_df` data frame is loaded below and consists of 33,433 flights from IAD (Dulles International) in 2016. The rows in this data frame represent a single flight with all of the associated features that are displayed in the table below.
@@ -307,59 +277,7 @@ flights_df<-flights_df%>%
 
 ggplot(flights_df, aes(month, fill = weekday_weekend)) + geom_bar()
 
-
 ```
-
-
-# Summary of Results
-
-Write an executive summary of your overall findings and recommendations to the executives at Dulles Airport. Think of this section as your closing remarks of a presentation, where you summarize your key findings and make recommendations on flight operations and strategies for minimizing flight delays.
-
-Your executive summary must be written in a [professional tone](https://www.universalclass.com/articles/writing/business-writing/appropriate-tone-in-business-communications.htm), with minimal grammatical errors, and should include the following
-sections:
-
-1.  An introduction where you explain the business problem and goals of your data analysis
-
-    -   What problem(s) is this company trying to solve? Why are they important
-        to their future success?
-
-    -   What was the goal of your analysis? What questions were you 
-        trying to answer and why do they matter?
-
-
-2.  Highlights and key findings from your Exploratory Data Analysis section
-
-    -   What were the interesting findings from your analysis and
-        **why are they important for the business**?
-
-    -   This section is meant to **establish the need for your recommendations** 
-        in the following section
-        
-
-3.  Your recommendations to the company
-
-    -   Each recommendation must be supported by your data analysis results
-
-    -   You must clearly explain **why** you are making each recommendation and which results 
-        from your data analysis support this recommendation
-
-    -   You must also describe the potential business impact of your recommendation:
-
-        -   Why is this a good recommendation?
-
-        -   What benefits will the business achieve?
-      
-
-
-## Executive Summary
-
-Please write your executive summary below. If you prefer, you can type your summary in a text editor, such as Microsoft Word, and paste your final text here.
-
-
-
-
-
-
 
 
 
