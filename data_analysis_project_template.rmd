@@ -29,33 +29,6 @@ flights_df
 ```
 
 
-# Exploratory Data Analysis
-
-
-Executives at this company have hired you as a data science consultant to evaluate their flight data and make recommendations on flight operations and strategies for minimizing flight delays.
-
-You must think of **at least 8 relevant questions** that will provide evidence for your recommendations.
-
-The goal of your analysis should be discovering which variables drive the differences between flights that are early/on-time vs. flights that are delayed.
-
-Some of the many questions you can explore include:
-
--   Are flight delays affected by taxi-out time? Do certain airlines or time of 
-    year lead to greater taxi out times (i.e. traffic jams on the runways)?
-
--   Are certain times of the day or year problematic?
-
--   Are certain destination or airlines prone to delays?
-
-
-You must answer each question and provide supporting data summaries with either a summary data frame (using `dplyr`/`tidyr`) or a plot (using `ggplot`) or both.
-
-In total, you must have a minimum of 5 plots and 4 summary data frames for the exploratory data analysis section. Among the plots you produce, you must have at least 4 different types (ex. box plot, bar chart,
-histogram, heat map, etc...)
-
-Each question must be answered with supporting evidence from your tables and plots.
-
-
 ## Question 1
 
 
