@@ -1,0 +1,370 @@
+---
+title: "Data Analysis Project"
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      message = FALSE, 
+                      warning = FALSE,
+                      comment = "")
+```
+
+
+
+# Student Information
+
+Name: Naman Lahoti
+G Number:G01340550
+
+
+
+
+# Introduction
+
+This semester we will be working with a dataset of all domestic outbound flights from Dulles International Airport in 2016.
+
+Airports depend on accurate flight departure and arrival estimates to maintain operations, profitability, customer satisfaction, and compliance with state and federal laws. Flight performance, including departure and arrival delays must be monitored, submitted to the Federal Aviation Agency (FAA) on a regular basis, and minimized to maintain airport operations. **The FAA considered a flight to be delayed if it has an arrival delay of at least 15 minutes**.
+
+The executives at Dulles International Airport have hired you as a Data Science consultant to perform an exploratory data analysis on all domestic flights from 2016 and produce an executive summary of your key insights and recommendations to the executive team.
+
+Before you begin, take a moment to read through the following airline flight terminology to familiarize yourself with the industry: [Airline Flight Terms](https://www.myairlineflight.com)
+
+
+
+## Dulles Flights Data
+
+The `flights_df` data frame is loaded below and consists of 33,433 flights from IAD (Dulles International) in 2016. The rows in this data frame represent a single flight with all of the associated features that are displayed in the table below.
+
+**Note**: If you have not installed the `tidyverse` package, please do so by going to the `Packages` tab in the lower right section of RStudio, select the `Install` button and type `tidyverse` into the prompt. If you cannot load the data, then try downloading the latest version of R (at least 4.0). The `readRDS()` function has different behavior in older versions of `R` and may cause loading issues.
+
+
+
+```{r}
+
+library(tidyverse)
+library(ggplot2)
+library(lubridate)
+flights_df <- readRDS(url('https://gmubusinessanalytics.netlify.app/data/dulles_flights.rds'))
+
+```
+
+
+### Raw Data
+
+```{r}
+
+flights_df
+
+```
+
+
+# Exploratory Data Analysis
+
+
+Executives at this company have hired you as a data science consultant to evaluate their flight data and make recommendations on flight operations and strategies for minimizing flight delays.
+
+You must think of **at least 8 relevant questions** that will provide evidence for your recommendations.
+
+The goal of your analysis should be discovering which variables drive the differences between flights that are early/on-time vs. flights that are delayed.
+
+Some of the many questions you can explore include:
+
+-   Are flight delays affected by taxi-out time? Do certain airlines or time of 
+    year lead to greater taxi out times (i.e. traffic jams on the runways)?
+
+-   Are certain times of the day or year problematic?
+
+-   Are certain destination or airlines prone to delays?
+
+
+You must answer each question and provide supporting data summaries with either a summary data frame (using `dplyr`/`tidyr`) or a plot (using `ggplot`) or both.
+
+In total, you must have a minimum of 5 plots and 4 summary data frames for the exploratory data analysis section. Among the plots you produce, you must have at least 4 different types (ex. box plot, bar chart,
+histogram, heat map, etc...)
+
+Each question must be answered with supporting evidence from your tables and plots.
+
+
+## Question 1
+
+
+
+**Question**:
+
+
+**Answer**:
+
+
+
+To add additional R code chunks for your work, select `Insert` then `R` from the top of this notebook file.
+
+```{r}
+ggplot(flights_df,aes(airline))+geom_bar(position = position_dodge(width = 0.5),fill="light green")+ 
+  geom_text(aes(label=..count..),stat="count",vjust = 1.2, colour = "black")+labs(title = "Airline carrier Frequency",position="center")+xlab("Airline")+ylab("Frequency")+theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+
+
+## Question 2
+
+
+
+**Question**:
+Is there a certain airline that has a record of number of delays in flight?
+
+
+**Answer**:
+
+
+
+
+```{r}
+
+flights_df%>%
+  select(airline,arrival_delay)%>%
+  filter(airline =="United"|airline =="American"|airline =="Delta"|airline =="Southwest"|airline =="JetBlue"|airline =="Virgin America"|airline =="Frontier"|airline =="ExpressJet"|airline =="SkyWest"|airline =="Alaska",arrival_delay>15)%>%
+  arrange(desc(arrival_delay))%>%
+  count(airline)
+
+flights_delay<-ggplot(flights_df, aes(x= dep_delay, y=arrival_delay,color=airline)) +xlim(-30, 1000) + geom_point()+
+  labs(title = "Airlines that have record number of delays")+
+  xlab("Departure delay (mins)")+
+  ylab("Arrival Delay (mins)")+theme(plot.title = element_text(hjust = 0.5))
+
+flights_delay
+
+```
+
+
+
+## Question 3
+
+
+
+**Question**:
+Is there any correlation between the number of flights and the average_delay?
+
+
+**Answer**:
+
+
+
+
+```{r}
+delays<-flights_df%>%
+group_by(tail_num)%>%
+  summarize(delay=mean(arrival_delay,na.rm=TRUE),
+            n=n())
+
+ggplot(delays,aes(x=n,y=delay))+geom_point(alpha=0.1)+ggtitle("Number of Flights Vs Average Delay")+xlab("Number of flights")+ylab("Average delay (mins)")+theme(plot.title = element_text(hjust = 0.5))
+
+
+
+```
+
+
+
+
+## Question 4
+
+
+
+**Question**:
+ Which destinations have the most airlines?
+
+
+**Answer**:
+
+
+
+
+```{r}
+flights_df %>%
+    group_by(dest_airport_name) %>%
+    summarize(airlines = n_distinct(airline)) %>%
+    arrange(desc(airlines))
+    ggplot(flights_df, aes(x=month, y=dest_airport_name, fill=airline,width=.7,height=.7))+
+      geom_tile()+theme(axis.text.x = element_text( color="#993333", 
+                           size=8,angle=90),
+          axis.text.y = element_text( color="#993333", 
+                           size=8))
+```
+
+
+
+
+## Question 5
+
+
+
+**Question**:
+
+What proportion of flights are delayed by more than one hour?
+
+
+**Answer**:
+
+
+
+
+```{r}
+flights_df%>%
+group_by(month,weekday)%>%
+  summarize(hour_perc = mean(arrival_delay > 60))%>%
+  arrange(desc(hour_perc))
+
+date<-flights_df%>%
+  mutate(scheduled_flight_date=ymd(scheduled_flight_date))%>%
+  mutate_at(vars(scheduled_flight_date),funs(year,month,date))
+
+date
+
+
+
+```
+
+
+## Question 6
+
+
+
+**Question**:
+
+
+
+**Answer**:
+
+
+
+
+```{r}
+flights_df %>%
+  group_by(month) %>%
+  summarise(mean_dep_delay = mean(dep_delay)) %>%
+  arrange(desc(mean_dep_delay))
+
+ggplot(flights_df, aes(x = month, y = dep_delay)) +
+  geom_boxplot()
+```
+
+
+## Question 7
+
+
+
+**Question**:
+
+
+
+**Answer**:
+
+
+
+
+```{r}
+flights_df<-flights_df %>%
+ mutate(season = ifelse(month_numeric %in% 9:11, "Fall",
+                         ifelse(month_numeric %in% 6:8, "Summer",
+                                ifelse(month_numeric %in% 3:5, "Spring",
+                                       "Winter"))))
+
+flights_delayed <- flights_df %>% 
+  filter(dep_delay>15) %>%
+   select(airline,dest_airport_city,month_numeric, season, dep_delay,tail_num, distance)
+
+flights_delayed
+
+ggplot(flights_delayed, aes(season, distance, fill=airline))+ geom_col()+
+   labs(title = "Flying Distance of airlines by Season")+xlab("Season") +ylab ("Distance") 
+
+```
+
+
+
+## Question 8
+
+
+
+**Question**:
+
+
+
+**Answer**:
+
+
+
+
+```{r}
+flights_df%>%
+  arrange(desc(dest_airport_city))%>%
+  count(dest_airport_city)
+
+flights_df<-flights_df%>%
+  mutate(weekday_weekend=ifelse(weekday == "Monday"|weekday =="Tuesday"|weekday =="Wednesday"|weekday =="Thursday","Weekday","Weekend"))
+
+
+ggplot(flights_df, aes(month, fill = weekday_weekend)) + geom_bar()
+
+
+```
+
+
+# Summary of Results
+
+Write an executive summary of your overall findings and recommendations to the executives at Dulles Airport. Think of this section as your closing remarks of a presentation, where you summarize your key findings and make recommendations on flight operations and strategies for minimizing flight delays.
+
+Your executive summary must be written in a [professional tone](https://www.universalclass.com/articles/writing/business-writing/appropriate-tone-in-business-communications.htm), with minimal grammatical errors, and should include the following
+sections:
+
+1.  An introduction where you explain the business problem and goals of your data analysis
+
+    -   What problem(s) is this company trying to solve? Why are they important
+        to their future success?
+
+    -   What was the goal of your analysis? What questions were you 
+        trying to answer and why do they matter?
+
+
+2.  Highlights and key findings from your Exploratory Data Analysis section
+
+    -   What were the interesting findings from your analysis and
+        **why are they important for the business**?
+
+    -   This section is meant to **establish the need for your recommendations** 
+        in the following section
+        
+
+3.  Your recommendations to the company
+
+    -   Each recommendation must be supported by your data analysis results
+
+    -   You must clearly explain **why** you are making each recommendation and which results 
+        from your data analysis support this recommendation
+
+    -   You must also describe the potential business impact of your recommendation:
+
+        -   Why is this a good recommendation?
+
+        -   What benefits will the business achieve?
+      
+
+
+## Executive Summary
+
+Please write your executive summary below. If you prefer, you can type your summary in a text editor, such as Microsoft Word, and paste your final text here.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
