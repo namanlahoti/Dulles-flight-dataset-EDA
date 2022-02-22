@@ -1,7 +1,3 @@
----
-title: "Data Analysis Project"
----
-
 ## Dulles Flights Data
 
 The `flights_df` data frame is loaded below and consists of 33,433 flights from IAD (Dulles International) in 2016. The rows in this data frame represent a single flight with all of the associated features that are displayed in the table below.
@@ -15,6 +11,8 @@ The `flights_df` data frame is loaded below and consists of 33,433 flights from 
 library(tidyverse)
 library(ggplot2)
 library(lubridate)
+library(viridis)
+library(hrbrthemes)
 flights_df <- readRDS(url('https://gmubusinessanalytics.netlify.app/data/dulles_flights.rds'))
 
 ```
@@ -34,7 +32,7 @@ flights_df
 
 
 **Question**:
-
+Which airlines operate the most from Dulles Internatiional Airport
 
 **Answer**:
 
@@ -43,9 +41,14 @@ flights_df
 To add additional R code chunks for your work, select `Insert` then `R` from the top of this notebook file.
 
 ```{r}
+#Airline carrier frequency
 ggplot(flights_df,aes(airline))+geom_bar(position = position_dodge(width = 0.5),fill="light green")+ 
-  geom_text(aes(label=..count..),stat="count",vjust = 1.2, colour = "black")+labs(title = "Airline carrier Frequency",position="center")+xlab("Airline")+ylab("Frequency")+theme(plot.title = element_text(hjust = 0.5))
+  geom_text(aes(label=..count..),stat="count",vjust = 1.2, colour = "black")+labs(title = "Airline carrier Frequency",position="center")+xlab("Airline")+ylab("Frequency")+theme(plot.title = element_text(hjust = 0.5),axis.text.x = element_text(size=8,angle=90))
 
+#Flights operating to different cities
+flights_df%>%
+  arrange(desc(dest_airport_city))%>%
+  count(dest_airport_city)
 ```
 
 
@@ -65,12 +68,14 @@ Is there a certain airline that has a record of number of delays in flight?
 
 ```{r}
 
+#Airlines having arrival delay of 15mins are considered as late (FAA)
 flights_df%>%
-  select(airline,arrival_delay)%>%
+  select(airline,arrival_delay,dep_delay)%>%
   filter(airline =="United"|airline =="American"|airline =="Delta"|airline =="Southwest"|airline =="JetBlue"|airline =="Virgin America"|airline =="Frontier"|airline =="ExpressJet"|airline =="SkyWest"|airline =="Alaska",arrival_delay>15)%>%
   arrange(desc(arrival_delay))%>%
   count(airline)
 
+#Arrival and departure delay of all airlines
 flights_delay<-ggplot(flights_df, aes(x= dep_delay, y=arrival_delay,color=airline)) +xlim(-30, 1000) + geom_point()+
   labs(title = "Airlines that have record number of delays")+
   xlab("Departure delay (mins)")+
@@ -87,7 +92,7 @@ flights_delay
 
 
 **Question**:
-Is there any correlation between the number of flights and the average_delay?
+Is there any relation between the number of flights and the average_delay?
 
 
 **Answer**:
@@ -103,19 +108,13 @@ group_by(tail_num)%>%
 
 ggplot(delays,aes(x=n,y=delay))+geom_point(alpha=0.1)+ggtitle("Number of Flights Vs Average Delay")+xlab("Number of flights")+ylab("Average delay (mins)")+theme(plot.title = element_text(hjust = 0.5))
 
-
-
 ```
-
-
-
 
 ## Question 4
 
 
-
 **Question**:
- Which destinations have the most airlines?
+ Which destinations have the most airlines operating?
 
 
 **Answer**:
@@ -125,14 +124,18 @@ ggplot(delays,aes(x=n,y=delay))+geom_point(alpha=0.1)+ggtitle("Number of Flights
 
 ```{r}
 flights_df %>%
-    group_by(dest_airport_name) %>%
+    group_by(dest_airport_city) %>%
     summarize(airlines = n_distinct(airline)) %>%
     arrange(desc(airlines))
-    ggplot(flights_df, aes(x=month, y=dest_airport_name, fill=airline,width=.7,height=.7))+
-      geom_tile()+theme(axis.text.x = element_text( color="#993333", 
-                           size=8,angle=90),
-          axis.text.y = element_text( color="#993333", 
-                           size=8))
+    ggplot(flights_df, aes(x=month, y=dest_airport_city, 
+                           fill=airline,width=.7,height=.7))+
+    geom_tile()+theme(axis.text.x = element_text( color="#993333", size=8,angle=90),
+    axis.text.y = element_text( color="#993333",size=8))+
+    ggtitle("Number of airlines operating to/from Destination Airport Cities")+
+    xlab("Month")+ylab("Destination airport City")+
+    theme(plot.title =element_text(hjust = 0.5))
+    
+    
 ```
 
 
@@ -144,7 +147,7 @@ flights_df %>%
 
 **Question**:
 
-What proportion of flights are delayed by more than one hour?
+What percentage of flights are delayed by more than one hour?
 
 
 **Answer**:
@@ -153,18 +156,21 @@ What proportion of flights are delayed by more than one hour?
 
 
 ```{r}
-flights_df%>%
-group_by(month,weekday)%>%
-  summarize(hour_perc = mean(arrival_delay > 60))%>%
-  arrange(desc(hour_perc))
+avg_dep_delay_df<-flights_df%>%
+  group_by(month_numeric, airline) %>%
+  summarize(avg_dep_delay = mean(dep_delay>60)*100) %>%
+  arrange(desc(avg_dep_delay))
 
-date<-flights_df%>%
-  mutate(scheduled_flight_date=ymd(scheduled_flight_date))%>%
-  mutate_at(vars(scheduled_flight_date),funs(year,month,date))
+avg_dep_delay_df
 
-date
-
-
+  ggplot(avg_dep_delay_df,mapping = aes(x = month_numeric, y = avg_dep_delay, color = airline)) +
+  geom_line(size = 1) +
+  scale_x_continuous(breaks = 1:12) +
+  xlab("Month") +
+  ylab("Average Departure Delay Time (percentage)") +
+  ggtitle("Airlines having departure delay time more than 1 hour")+
+  theme(plot.title =element_text(hjust = 0.5))
+  
 
 ```
 
@@ -174,7 +180,7 @@ date
 
 
 **Question**:
-
+From which cities do flights arrive late to the Dulles International Airport?
 
 
 **Answer**:
@@ -183,13 +189,16 @@ date
 
 
 ```{r}
-flights_df %>%
-  group_by(month) %>%
-  summarise(mean_dep_delay = mean(dep_delay)) %>%
-  arrange(desc(mean_dep_delay))
 
-ggplot(flights_df, aes(x = month, y = dep_delay)) +
-  geom_boxplot()
+#Arrival delay of flights from cities
+flights_df %>%
+  group_by(dest_airport_name,arrival_delay)%>%
+  ggplot( aes(x = dest_airport_city, y = arrival_delay)) +
+  geom_boxplot()+theme(axis.text.x = element_text(size=8,angle=90))+
+  xlab("City Name") +
+  ylab("Arrival delay of the flight \n in minutes") +
+  ggtitle("Arrival delay of flights from cities")+
+  theme(plot.title =element_text(hjust = 0.5))
 ```
 
 
@@ -198,7 +207,7 @@ ggplot(flights_df, aes(x = month, y = dep_delay)) +
 
 
 **Question**:
-
+Is there any certain season of the year where flights travel to distant cities?
 
 
 **Answer**:
@@ -214,21 +223,20 @@ flights_df<-flights_df %>%
                                        "Winter"))))
 
 flights_delayed <- flights_df %>% 
-  filter(dep_delay>15) %>%
-   select(airline,dest_airport_city,month_numeric, season, dep_delay,tail_num, distance)
+filter(dep_delay>15) %>%
+select(airline,dest_airport_city,month_numeric, season, dep_delay,tail_num, distance)
 
 flights_delayed
 
 ggplot(flights_delayed, aes(season, distance, fill=airline))+ geom_col()+
-   labs(title = "Flying Distance of airlines by Season")+xlab("Season") +ylab ("Distance") 
-
+labs(title = "Flying Distance of airlines by Season")+xlab("Season") +ylab ("Distance")+theme(plot.title =element_text(hjust = 0.5))
 ```
 
 
 
 ## Question 8
 
-
+What are the number of airlines that operate more during the weekdays or weekends based on the month/season?
 
 **Question**:
 
@@ -240,22 +248,22 @@ ggplot(flights_delayed, aes(season, distance, fill=airline))+ geom_col()+
 
 
 ```{r}
-flights_df%>%
-  arrange(desc(dest_airport_city))%>%
-  count(dest_airport_city)
-
+#Segregating days of the week to weekdays and weekends
 flights_df<-flights_df%>%
   mutate(weekday_weekend=ifelse(weekday == "Monday"|weekday =="Tuesday"|weekday =="Wednesday"|weekday =="Thursday","Weekday","Weekend"))
 
+#Bar chart for number of flights operating during weekdays/weekends based on the month
+ggplot(flights_df, aes(month, fill = weekday_weekend)) + geom_bar()+theme(axis.text.x = element_text(size=8,angle=90))+
+labs(title = "Flights operating in Weekdays Vs Weekends")+xlab("Month") +ylab ("Number of flights")+theme(plot.title =element_text(hjust = 0.5))+geom_text(aes(label = ..count..), stat = "count", vjust = 1.5,size=3)
 
-ggplot(flights_df, aes(month, fill = weekday_weekend)) + geom_bar()
+#Bar chart for number of flights operating during weekdays/weekends based on the season
+ggplot(flights_df, aes(season, fill = weekday_weekend)) + geom_bar()+theme(axis.text.x = element_text(size=8,angle=90))+
+labs(title = "Flights operating in Weekdays Vs Weekends")+xlab("Season") +ylab ("Number of flights")+theme(plot.title =element_text(hjust = 0.5))+geom_text(aes(label = ..count..), stat = "count", vjust = 1.5,size=3)
+
+#Histogram for number of airlines operating during weekdays/weekends
+plot_ly(flights_df,x = ~airline, color = ~weekday_weekend)%>%
+  layout(title = "Airlines operating in Weekdays Vs Weekends",
+         xaxis =list(title = 'Airlines'), 
+         yaxis = list(title = 'Number of flights'))
 
 ```
-
-
-
-
-
-
-
-
