@@ -28,6 +28,3 @@ Since Frontier airlines had the delays of more than 1 hour in 2016 than any othe
 By solving the above problems using the key findings and recommended solutions, the airport can function smoothly without any bottlenecks and there are also chances that delays by airlines be reduced. 
 
 Since ferrying the passengers and smooth functioning of flights is necessary for any airport, additional information like the airtime of a flight, weather forecast, temperature, passenger count and certain other criteria are very important to gain accurate insights and provide absolute recommendations.
-
-
-![image](https://user-images.githubusercontent.com/37064981/158033892-a4e3ed48-c5d7-43a1-bb9f-51979410af2e.png)
